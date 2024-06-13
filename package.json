@@ -8,5 +8,12 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "sequelize": "^6.37.3",
+    "express": "^4.19.2",
+    "pg": "^8.11.5",
+    "bcrypt": "^5.1.1"
+  }
 }

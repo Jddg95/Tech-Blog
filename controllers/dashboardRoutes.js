@@ -2,6 +2,10 @@ const router = require("express").Router();
 const { Post } = require("../models");
 const withAuth = require("../utils/auth");
 
+router.get("/", (req, res) => {
+  res.send("Dashboard route working");
+});
+
 // Route to get all posts for the logged-in user
 router.get("/", withAuth, async (req, res) => {
   try {
@@ -22,7 +26,7 @@ router.get("/", withAuth, async (req, res) => {
   }
 });
 
-// Route to get the page to create a new post
+// // Route to get the page to create a new post
 router.get("/new", withAuth, (req, res) => {
   res.render("new-post", {
     logged_in: req.session.logged_in,

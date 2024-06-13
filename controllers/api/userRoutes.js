@@ -1,55 +1,79 @@
-const router = require('express').Router();
-const { User } = require('../../models');
-const bcrypt = require('bcrypt');
+const router = require("express").Router();
+const { User } = require("../../models");
+const bcrypt = require("bcrypt");
 
-// Route to get all users
-router.get('/', async (req, res) => {
+// Route to handle user login
+router.post("/login", async (req, res) => {
   try {
-    const users = await User.findAll();
-    res.status(200).json(users);
+    // Find the user by their username
+    const userData = await User.findOne({
+      where: { username: req.body.username },
+    });
+
+    if (!userData) {
+      res
+        .status(400)
+        .json({ message: "Incorrect username or password, please try again" });
+      return;
+    }
+
+    // Check if the password is valid
+    const validPassword = await userData.checkPassword(req.body.password);
+
+    if (!validPassword) {
+      res
+        .status(400)
+        .json({ message: "Incorrect username or password, please try again" });
+      return;
+    }
+
+    // Save the user session
+    req.session.save(() => {
+      req.session.user_id = userData.id;
+      req.session.logged_in = true;
+      res.json({ user: userData, message: "You are now logged in!" });
+    });
   } catch (err) {
-    res.status(500).json(err);
+    res.status(400).json(err);
   }
 });
 
-// Route to create a new user
-router.post('/', async (req, res) => {
+// Route to handle user signup
+router.post("/signup", async (req, res) => {
   try {
-    const newUser = await User.create({
+    // Create a new user
+    const userData = await User.create({
       username: req.body.username,
-      password: await bcrypt.hash(req.body.password, 10),
+      email: req.body.email,
+      password: await bcrypt.hash(req.body.password, 10), // Hash the password before saving
     });
-    res.status(200).json(newUser);
+
+    if (!userData) {
+      return res.status(400).json({ message: "Failed to create user" });
+    }
+
+    // Save the user session
+    req.session.save(() => {
+      req.session.user_id = userData.id;
+      req.session.logged_in = true;
+      res
+        .status(200)
+        .json({ user: userData, message: "You are now logged in!" });
+    });
   } catch (err) {
-    res.status(500).json(err);
+    res.status(400).json(err);
   }
 });
 
-// Route to update a user
-router.put('/:id', async (req, res) => {
-  try {
-    const updatedUser = await User.update(req.body, {
-      where: {
-        id: req.params.id,
-      },
+// Route to handle user logout
+router.post("/logout", (req, res) => {
+  if (req.session.logged_in) {
+    // Destroy the user session
+    req.session.destroy(() => {
+      res.status(204).end();
     });
-    res.status(200).json(updatedUser);
-  } catch (err) {
-    res.status(500).json(err);
-  }
-});
-
-// Route to delete a user
-router.delete('/:id', async (req, res) => {
-  try {
-    const result = await User.destroy({
-      where: {
-        id: req.params.id,
-      },
-    });
-    res.status(200).json(result);
-  } catch (err) {
-    res.status(500).json(err);
+  } else {
+    res.status(404).end();
   }
 });
 

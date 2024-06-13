@@ -1,11 +1,11 @@
-const router = require('express').Router();
-const { Post, User, Comment } = require('../../models');
+const router = require("express").Router();
+const { Post, User, Comment } = require("../../models");
 
 // Route to get all posts
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const posts = await Post.findAll({
-      include: [User, Comment]
+      include: [User, Comment],
     });
     res.status(200).json(posts);
   } catch (err) {
@@ -14,7 +14,7 @@ router.get('/', async (req, res) => {
 });
 
 // Route to create a new post
-router.post('/', async (req, res) => {
+router.post("/", async (req, res) => {
   try {
     const newPost = await Post.create({
       title: req.body.title,
@@ -28,7 +28,7 @@ router.post('/', async (req, res) => {
 });
 
 // Route to update a post
-router.put('/:id', async (req, res) => {
+router.put("/:id", async (req, res) => {
   try {
     const updatedPost = await Post.update(req.body, {
       where: {
@@ -42,7 +42,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // Route to delete a post
-router.delete('/:id', async (req, res) => {
+router.delete("/:id", async (req, res) => {
   try {
     const result = await Post.destroy({
       where: {
